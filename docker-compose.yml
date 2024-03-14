@@ -1,0 +1,30 @@
+version: '3'
+
+services:
+  web:
+    build: . #build the image for the web service from the dockerfile in parent directory
+    command: sh -c "python manage.py makemigrations &&
+                    python manage.py migrate &&
+                    python manage.py collectstatic --no-input &&
+                    gunicorn server.wsgi:application --bind 0.0.0.0:8000"
+    volumes:
+      - .:/app # map data and files from parent directory in host to microservice directory in docker containers
+      - /var/run/docker.sock:/var/run/docker.sock
+      # - /usr/bin/docker:/usr/bin/docker
+      - ./static:/app/static
+    depends_on:
+      - postgres_db
+      - redis
+    env_file:
+      - .env
+
+
+  nginx:
+    build: ./nginx
+    volumes:
+      - ./static:/app/static
+    ports:
+      - "80:80"
+    depends_on:
+      - web
+    restart: "on-failure"
