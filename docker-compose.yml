@@ -9,12 +9,8 @@ services:
                     gunicorn server.wsgi:application --bind 0.0.0.0:8000"
     volumes:
       - .:/app # map data and files from parent directory in host to microservice directory in docker containers
-      - /var/run/docker.sock:/var/run/docker.sock
-      # - /usr/bin/docker:/usr/bin/docker
       - ./static:/app/static
-    depends_on:
-      - postgres_db
-      - redis
+
     env_file:
       - .env
 
